@@ -5,7 +5,7 @@ import apiRoute from "./routes/api";
 import { setupWebSocketServer } from "./wsServer";
 
 const app: Application = express();
-const port = 8080;
+const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(app);
 
@@ -16,6 +16,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/api", apiRoute);
 
-server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+server.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
 });
