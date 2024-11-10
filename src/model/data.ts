@@ -1,18 +1,24 @@
-const works = [
-  new Array<string>(),
-  new Array<string>(),
-  new Array<string>(),
-];
+const works = new Map<string, Array<string>>();
 
-export const pushNewWork = (work: string): number => {
-  const pendingWork1 = works[0].length;
-  const pendingWork2 = works[1].length;
-  const pendingWork3 = works[2].length;
+works.set("abraham", new Array<string>());
+works.set("endre", new Array<string>());
+works.set("tamas", new Array<string>());
+
+const names = ["abraham", "endre", "tamas"];
+
+export const pushNewWork = (work: string): string => {
+  const pendingWork1 = works.get("abraham")?.length;
+  const pendingWork2 = works.get("endre")?.length;
+  const pendingWork3 = works.get("tamas")?.length;
 
   const workLoads = [pendingWork1, pendingWork2, pendingWork3];
 
   const smalestWorkLoad = [pendingWork1, pendingWork2, pendingWork3].sort()[0];
 
-  works[workLoads.indexOf(smalestWorkLoad)].push(work);
-  return smalestWorkLoad;
+  const selectedName = names[workLoads.indexOf(smalestWorkLoad)];
+
+  const selectedWorkArray = works.get(selectedName);
+  selectedWorkArray?.push(work);
+
+  return selectedName;
 };
