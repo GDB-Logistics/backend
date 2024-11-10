@@ -5,6 +5,7 @@
   "main": "src/app.ts",
   "scripts": {
     "setNode": "nvm use 23.1.0",
+    "start": "ts-node src/server.ts",
     "dev": "npx nodemon src/server.ts"
   },
   "keywords": [],
