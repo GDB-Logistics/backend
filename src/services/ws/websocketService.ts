@@ -1,36 +1,42 @@
-import { WebSocket } from "ws";
+import { Server, Socket } from "socket.io";
 import { Request } from "express";
 
 const adminClients = new Map<string | undefined, Client>();
 const mobileClients = new Map<string | undefined, Client>();
 
-interface Client extends WebSocket {
+interface Client extends Socket {
   userId: string;
   connectionType: "admin" | "mobile" | "desktop";
 }
 
-export const handleConnection = (ws: Client, req: Request) => {
-  ws.on("message", (message) => {
+export const handleConnection = (io: Client, req: Request) => {
+  // Handle login from client
+  io.on("login", (message : string) => {});
+
+  // Handle work completion
+  io.on("completed", (message: string) => {});
+
+  io.on("message", (message: string) => {
     const data = JSON.parse(message.toString());
 
     if (data.userId && data.connectionType) {
-      ws.userId = data.userId;
-      ws.connectionType = data.connectionType;
+      io.userId = data.userId;
+      io.connectionType = data.connectionType;
     }
 
-    if (ws.connectionType === "admin") {
-      adminClients.set(ws.userId, ws);
-      ws.send("Welcome ADMIN!")!;
-    } else if (ws.connectionType === "mobile") {
-      mobileClients.set(ws.userId, ws);
-      ws.send("Welcome MOBILE!")!;
+    if (io.connectionType === "admin") {
+      adminClients.set(io.userId, io);
+      io.send("Welcome ADMIN!")!;
+    } else if (io.connectionType === "mobile") {
+      mobileClients.set(io.userId, io);
+      io.send("Welcome MOBILE!")!;
     }
   });
 
   // Delete connection
-  ws.on("close", () => {
-    if (ws.connectionType === "admin") adminClients.delete(ws.userId);
-    if (ws.connectionType === "mobile") mobileClients.delete(ws.userId);
+  io.on("close", () => {
+    if (io.connectionType === "admin") adminClients.delete(io.userId);
+    if (io.connectionType === "mobile") mobileClients.delete(io.userId);
   });
 };
 
