@@ -36,17 +36,14 @@ export const handleConnection = (ws: Client, req: Request) => {
 
 export const broadcastToWebSocketClients = (
   userType: "admin" | "mobile",
+  userId: string,
   message: string
 ) => {
-  if (userType == "admin") {
-    adminClients.forEach((client) => {
-      client.send(`${client.userId} message : ${message}`);
-    });
-  }
+  adminClients.forEach((client) => {
+    client.send(`Assigned ${message} order to: ${client.userId}`);
+  });
 
   if (userType == "mobile") {
-    mobileClients.forEach((client) => {
-      client.send(`${client.userId} message : ${message}`);
-    });
+    mobileClients.get(userId)?.send(message);
   }
 };
