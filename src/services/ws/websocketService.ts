@@ -39,11 +39,9 @@ export const broadcastToWebSocketClients = (
   userId: string,
   message: string
 ) => {
-  if (userType == "admin") {
-    adminClients.forEach((client) => {
-      client.send(`${client.userId} message : ${message}`);
-    });
-  }
+  adminClients.forEach((client) => {
+    client.send(`Assigned ${message} order to: ${client.userId}`);
+  });
 
   if (userType == "mobile") {
     mobileClients.get(userId)?.send(message);
