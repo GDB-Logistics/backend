@@ -1,4 +1,4 @@
-import { Server, Socket } from "socket.io";
+import { Socket } from "socket.io";
 import { Request } from "express";
 
 const adminClients = new Map<string | undefined, Client>();
@@ -7,10 +7,10 @@ const mobileClients = new Map<string | undefined, Client>();
 
 interface Client extends Socket {
   userId: string;
-  connectionType: "admin" | "mobile" | "desktop";
+  connectionType: "admin" | "mobile" ;
 }
 
-export const handleConnection = (io: Client, req: Request) => {
+export const handleConnection = (io: any, req: Request) => {
   // Handle login from client
   io.on("login", (message : string) => {});
 
