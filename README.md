@@ -16,6 +16,13 @@ ws.send(JSON.stringify({ type: 'desktop' })); // type: admin | mobile
 console.log('Connected as desktop client');
 };
 
+# Test with postman
+   ![image](https://github.com/user-attachments/assets/9634fd76-86a8-457a-97b2-32689437f3c9)
+   You need to add message in events to recive message events
+   In the messages tab on the bottom right you need to set the custom event type to pl: login
+   and add the data to the ARG in json
+
+
 # File system
 
 1. src/controllers/
