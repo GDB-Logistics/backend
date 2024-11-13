@@ -1,9 +1,9 @@
-import express from "express";
+import express from 'express';
 
-import * as apiController from "../controllers/api/api";
+import * as apiController from '../controllers/api/api';
 
 const router = express.Router();
 
-router.post("/", apiController.newOrder);
+router.post('/', apiController.newOrder);
 
 export default router;
