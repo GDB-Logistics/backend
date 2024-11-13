@@ -6,6 +6,6 @@
     "esModuleInterop": true,
     "outDir": "dist"
   },
-  "include": ["src", "socket.io.d.ts"],
+  "include": ["src"],
   "exclude": ["src/node_modules"]
 }
