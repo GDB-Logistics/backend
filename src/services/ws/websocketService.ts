@@ -1,5 +1,8 @@
 import { Socket } from 'socket.io';
 import { Request } from 'express';
+import { removeCompletedWork } from '../../model/data';
+
+// const PING_INTERVAL = 30000;
 
 const adminClients = new Map<string | undefined, Client>();
 const mobileClients = new Map<string | undefined, Client>();
@@ -10,10 +13,32 @@ interface Client extends Socket {
 }
 
 export const handleConnection = (io: Client) => {
+    // Keeping connection alive
+    // io.isAlive = true;
+
+    // io.on('pong', () => {
+    //     io.isAlive = true;
+    // });
+
+    // const interval = setInterval(() => {
+    //     if (!io.isAlive) {
+    //         clearInterval(interval);
+    //         io.terminate();
+    //         return;
+    //     }
+
+    //     io.isAlive = false;
+    //     io.ping();
+    // }, PING_INTERVAL);
+
+    // io.on('close', () => {
+    //     clearInterval(interval);
+    // });
+
+
     // Handle login from client
     io.on('login', (data: { userId: string; connectionType: 'admin' | 'mobile' }) => {
-        io.userId = data.userId;
-        io.connectionType = data.connectionType;
+        const { userId, connectionType } = data;
 
         if (io.connectionType === 'admin') {
             adminClients.set(io.userId, io);
@@ -22,10 +47,17 @@ export const handleConnection = (io: Client) => {
             mobileClients.set(io.userId, io);
             io.send('Welcome MOBILE!')!;
         }
+
+        io.send({ status: 200 });
     });
 
     // Handle work completion
-    io.on('completed', (data: { userId: string; work: string }) => {});
+    io.on('completed', (data: { userId: string; work: string }) => {
+        const { userId, work } = data;
+        removeCompletedWork(userId, work);
+        broadcastFinishedWork(work);
+        io.send({ status: 200 });
+    });
 
     // Delete connection
     io.on('close', () => {
@@ -34,7 +66,13 @@ export const handleConnection = (io: Client) => {
     });
 };
 
-export const broadcastToWebSocketClients = (userId: string, work: string) => {
+export const broadcastFinishedWork = (work: string): void => {
+    adminClients.forEach((client) => {
+        client.send(`${work} is finsihed!`);
+    });
+};
+
+export const broadcastNewWork = (userId: string, work: string) => {
     adminClients.forEach((client) => {
         client.send(`Assigned ${work} order to: ${userId}`);
     });

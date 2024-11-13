@@ -25,5 +25,10 @@ export const pushNewWork = (work: string): string => {
 
 export const removeCompletedWork = (userId: string, work: string): void => {
     const selectedWorkArray = works.get(userId);
-    selectedWorkArray?.filter((i) => i === work);
+    if (selectedWorkArray) {
+        works.set(
+            userId,
+            selectedWorkArray.filter((i) => i !== work),
+        );
+    }
 };
