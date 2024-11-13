@@ -1,13 +1,13 @@
 import { Server, Socket } from 'socket.io';
 import { handleConnection } from "./services/ws/websocketService";
 
-const io = new Server(Server);
+const io = new Server();
 
 
-// interface Client extends Socket {
-//   userId?: string;
-//   userType?: "admin" | "mobile" | "desktop";
-// }
+ interface Client extends Socket {
+   userId?: string;
+   userType?: "admin" | "mobile" | "desktop";
+}
 
 //Websocket setup
 export const setupWebSocketServer = (server: any) => {

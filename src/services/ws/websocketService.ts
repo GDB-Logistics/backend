@@ -4,35 +4,31 @@ import { Request } from "express";
 const adminClients = new Map<string | undefined, Client>();
 const mobileClients = new Map<string | undefined, Client>();
 
-
 interface Client extends Socket {
-  userId: string;
-  connectionType: "admin" | "mobile" ;
+  userId?: string;
+  connectionType?: "admin" | "mobile";
 }
 
-export const handleConnection = (io: any, req: Request) => {
+export const handleConnection = (io: Client) => {
   // Handle login from client
-  io.on("login", (message : string) => {});
-
-  // Handle work completion
-  io.on("completed", (message: string) => {});
-
-  io.on("message", (message: string) => {
-    const data = JSON.parse(message.toString());
-
-    if (data.userId && data.connectionType) {
+  io.on(
+    "login",
+    (data: { userId: string; connectionType: "admin" | "mobile" }) => {
       io.userId = data.userId;
       io.connectionType = data.connectionType;
-    }
 
-    if (io.connectionType === "admin") {
-      adminClients.set(io.userId, io);
-      io.send("Welcome ADMIN!")!;
-    } else if (io.connectionType === "mobile") {
-      mobileClients.set(io.userId, io);
-      io.send("Welcome MOBILE!")!;
+      if (io.connectionType === "admin") {
+        adminClients.set(io.userId, io);
+        io.send("Welcome ADMIN!")!;
+      } else if (io.connectionType === "mobile") {
+        mobileClients.set(io.userId, io);
+        io.send("Welcome MOBILE!")!;
+      }
     }
-  });
+  );
+
+  // Handle work completion
+  io.on("completed", (data: { userId: string; work: string }) => {});
 
   // Delete connection
   io.on("close", () => {
