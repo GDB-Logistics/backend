@@ -41,11 +41,11 @@ export const handleConnection = (io: Client) => {
       console.log("login event")
         const { userId, connectionType } = data;
 
-        if (io.connectionType === 'admin') {
-            adminClients.set(io.userId, io);
+        if (connectionType === 'admin') {
+            adminClients.set(userId, io);
             io.send('Welcome ADMIN!')!;
-        } else if (io.connectionType === 'mobile') {
-            mobileClients.set(io.userId, io);
+        } else if (connectionType === 'mobile') {
+            mobileClients.set(userId, io);
             io.send('Welcome MOBILE!')!;
         }
 
