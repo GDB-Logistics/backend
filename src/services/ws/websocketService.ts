@@ -14,6 +14,7 @@ export const handleConnection = (io: Client) => {
   io.on(
     "login",
     (data: { userId: string; connectionType: "admin" | "mobile" }) => {
+      console.log("login event")
       io.userId = data.userId;
       io.connectionType = data.connectionType;
 
@@ -31,14 +32,13 @@ export const handleConnection = (io: Client) => {
   io.on("completed", (data: { userId: string; work: string }) => {});
 
   // Delete connection
-  io.on("close", () => {
+  io.on("disconnect", () => {
     if (io.connectionType === "admin") adminClients.delete(io.userId);
     if (io.connectionType === "mobile") mobileClients.delete(io.userId);
   });
 };
 
 export const broadcastToWebSocketClients = (
-  userType: "admin" | "mobile",
   userId: string,
   message: string
 ) => {
@@ -46,7 +46,5 @@ export const broadcastToWebSocketClients = (
     client.send(`Assigned ${message} order to: ${client.userId}`);
   });
 
-  if (userType == "mobile") {
     mobileClients.get(userId)?.send(message);
-  }
 };

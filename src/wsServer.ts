@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { handleConnection } from "./services/ws/websocketService";
 
-const io = new Server();
+
 
 
  interface Client extends Socket {
@@ -11,6 +11,13 @@ const io = new Server();
 
 //Websocket setup
 export const setupWebSocketServer = (server: any) => {
+  const io = new Server(server, {
+    cors: {
+      origin: "*", // or specify your client's origin
+      methods: ["GET", "POST"]
+    }
+  });
+
   io.listen(3000);
   console.log("WebSocket server is running");
 

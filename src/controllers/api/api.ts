@@ -3,10 +3,9 @@ import { pushNewWork } from "../../model/data";
 import { broadcastToWebSocketClients } from "../../services/ws/websocketService";
 
 export const newOrder = (req: Request, res: Response): void => {
-  const userType = req.body.userType;
-  const message = req.body.message;
+  const order = req.body.order;
 
-  const numberOfWorker = pushNewWork(message);
-  broadcastToWebSocketClients(userType, numberOfWorker, message);
+  const numberOfWorker = pushNewWork(order);
+  broadcastToWebSocketClients(numberOfWorker, order);
   res.status(201).json({ message: "ok" });
 };
