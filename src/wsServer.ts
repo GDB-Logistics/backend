@@ -11,17 +11,8 @@ interface Client extends Socket {
 
 //Websocket setup
 export const setupWebSocketServer = (server: any) => {
-    io.listen(PORT);
+  io.listen(PORT);
     console.log('WebSocket server is running');
-  const io = new Server(server, {
-    cors: {
-      origin: "*", // or specify your client's origin
-      methods: ["GET", "POST"]
-    }
-  });
-
-  io.listen(3000);
-  console.log("WebSocket server is running");
 
     io.on('connection', handleConnection);
 };
