@@ -6,6 +6,6 @@ export const newOrder = (req: Request, res: Response): void => {
   const order = req.body.order;
 
   const numberOfWorker = pushNewWork(order);
-  broadcastToWebSocketClients(numberOfWorker, order);
+  broadcastNewWork(numberOfWorker, order);
   res.status(201).json({ message: "ok" });
 };
