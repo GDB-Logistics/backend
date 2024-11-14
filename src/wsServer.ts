@@ -4,8 +4,6 @@ import { handleConnection } from './services/ws/websocketService';
 const io = new Server();
 const PORT: number = Number(process.env.PORT) || 3030;
 
-
-
 interface Client extends Socket {
     userId?: string;
     userType?: 'admin' | 'mobile' | 'desktop';
