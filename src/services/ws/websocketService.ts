@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import { Request } from 'express';
 import { removeCompletedWork } from '../../model/data';
 
-// const PING_INTERVAL = 30000;
+
 
 const adminClients = new Map<string | undefined, Client>();
 const mobileClients = new Map<string | undefined, Client>();
@@ -10,43 +10,19 @@ const mobileClients = new Map<string | undefined, Client>();
 interface Client extends Socket {
     userId?: string;
     connectionType?: 'admin' | 'mobile';
+    isAlive?: boolean;
 }
 
 export const handleConnection = (io: Client) => {
-    // Keeping connection alive
-    // io.isAlive = true;
-
-    // io.on('pong', () => {
-    //     io.isAlive = true;
-    // });
-
-    // const interval = setInterval(() => {
-    //     if (!io.isAlive) {
-    //         clearInterval(interval);
-    //         io.terminate();
-    //         return;
-    //     }
-
-    //     io.isAlive = false;
-    //     io.ping();
-    // }, PING_INTERVAL);
-
-    // io.on('close', () => {
-    //     clearInterval(interval);
-    // });
-
 
     // Handle login from client
     io.on('login', (data: { userId: string; connectionType: 'admin' | 'mobile' }) => {
-      console.log("login event")
         const { userId, connectionType } = data;
 
         if (connectionType === 'admin') {
             adminClients.set(userId, io);
-            io.send('Welcome ADMIN!')!;
         } else if (connectionType === 'mobile') {
             mobileClients.set(userId, io);
-            io.send('Welcome MOBILE!')!;
         }
 
         io.send({ status: 200 });
@@ -69,14 +45,14 @@ export const handleConnection = (io: Client) => {
 
 export const broadcastFinishedWork = (work: string): void => {
     adminClients.forEach((client) => {
-        client.send(`${work} is finsihed!`);
+        client.emit('workCompleted', work);
     });
 };
 
 export const broadcastNewWork = (userId: string, work: string) => {
     adminClients.forEach((client) => {
-        client.send(`Assigned ${work} order to: ${userId}`);
+        client.emit('newWork', { userId, work });
     });
 
-    mobileClients.get(userId)?.send(work);
+    mobileClients.get(userId)?.emit('newWork', work);
 };
