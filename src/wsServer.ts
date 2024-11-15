@@ -16,3 +16,5 @@ export const setupWebSocketServer = (server: any) => {
 
     io.on('connection', handleConnection);
 };
+
+export default setupWebSocketServer;

@@ -19,10 +19,18 @@ export const handleConnection = (io: Client) => {
     io.on('login', (data: { userId: string; connectionType: 'admin' | 'mobile' }) => {
         const { userId, connectionType } = data;
 
+        if(!userId || !connectionType){
+            io.send({ status: 400, error: 'Invalid request' });
+            return;
+        }
+
         if (connectionType === 'admin') {
             adminClients.set(userId, io);
         } else if (connectionType === 'mobile') {
             mobileClients.set(userId, io);
+        }else{
+            io.send({ status: 400, error: 'Invalid connection type' });
+            return;
         }
 
         io.send({ status: 200 });
@@ -30,10 +38,20 @@ export const handleConnection = (io: Client) => {
 
     // Handle work completion
     io.on('completed', (data: { userId: string; work: string }) => {
-        const { userId, work } = data;
-        removeCompletedWork(userId, work);
-        broadcastFinishedWork(work);
-        io.send({ status: 200 });
+        try{
+            const { userId, work } = data;
+    
+            if(!userId || !work){
+                io.send({ status: 400, error: 'Invalid request' });
+                return;
+            }
+    
+            removeCompletedWork(userId, work);
+            broadcastFinishedWork(work);
+            io.send({ status: 200 });
+        }catch(e){
+            io.send({ status: 500, error: 'Internal Server Error' });
+        }
     });
 
     // Delete connection
@@ -45,14 +63,14 @@ export const handleConnection = (io: Client) => {
 
 export const broadcastFinishedWork = (work: string): void => {
     adminClients.forEach((client) => {
-        client.emit('workCompleted', work);
+        client.emit('workCompleted', {work: work});
     });
 };
 
 export const broadcastNewWork = (userId: string, work: string) => {
     adminClients.forEach((client) => {
-        client.emit('newWork', { userId, work });
+        client.emit('newWork', { userId: userId, work: work });
     });
 
-    mobileClients.get(userId)?.emit('newWork', work);
+    mobileClients.get(userId)?.emit('newWork', {work: work});
 };
