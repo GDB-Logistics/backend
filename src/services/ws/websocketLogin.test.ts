@@ -27,6 +27,8 @@ describe('WebSocket Server', () => {
         clientSocket.close();
     });
 
+    //** Tests
+
     test('should handle login event admin', (done) => {
         clientSocket.emit('login', { userId: 'user1', connectionType: 'admin' });
         clientSocket.on('message', (data: { status: number }) => {
