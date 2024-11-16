@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { handleConnection } from './services/ws/websocketService';
 
 const io = new Server();
-const PORT: number = Number(process.env.PORT) || 3030;
+const PORT: number = Number(process.env.PORT) || 3020;
 
 interface Client extends Socket {
     userId?: string;

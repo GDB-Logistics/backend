@@ -3,11 +3,10 @@ import Client from 'socket.io-client';
 import { handleConnection } from '../ws/websocketService';
 
 import request from 'supertest';
-import app from '../../server';
+import {app} from '../../server';
 
 describe('WebSocket Tests', () => {
     const io: Server = new Server();
-    let serverSocket: any;
     let clientSocket: any;
     const PORT = 3090;
 
@@ -33,27 +32,30 @@ describe('WebSocket Tests', () => {
 
     //** Tests
 
-    beforeEach((done) => {
+    test('should handle getting newWork to admin', (done) => {
         clientSocket.emit('login', { userId: 'user1', connectionType: 'admin' });
-        clientSocket.on('message', (data: { status: number }) => {
-          expect(data).toEqual({ status: 200 });
-          done();
-      });
-    });
-
-    test('should handle login event', (done) => {
-        clientSocket.emit('login', { userId: 'user1', connectionType: 'admin' });
-        clientSocket.on('message', (data: { status: number }) => {
-          expect(data).toEqual({ status: 200 });
-          done();
-      });
+        clientSocket.on('newWork', (data: { userId: string; work: string }) => {
+            try {
+                expect(data).toEqual({ userId: 'abraham', work: 'testOrder' });
+                done();
+            } catch (error) {
+                done(error);
+            }
+        });
+        request(app)
+            .post('/api/')
+            .send({ order: 'testOrder' })
+            .expect(201)
+            .end((err) => {
+                if (err) return done(err);
+            });
     });
 
     test('should handle completed event', (done) => {
         clientSocket.emit('completed', { userId: 'user1', work: 'task1' });
         clientSocket.on('message', (data: { status: number }) => {
-          expect(data).toEqual({ status: 200 });
-          done();
-      });
+            expect(data).toEqual({ status: 200 });
+            done();
+        });
     });
 });
