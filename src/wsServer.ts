@@ -11,7 +11,7 @@ interface Client extends Socket {
 
 //Websocket setup
 export const setupWebSocketServer = (server: any) => {
-  io.listen(PORT);
+    io.listen(PORT);
     console.log('WebSocket server is running');
 
     io.on('connection', handleConnection);
