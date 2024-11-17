@@ -6,7 +6,6 @@ describe('API Tests', () => {
     let server: any = createServer(PORT);
 
     beforeAll((done) => {
-
         done();
     });
 
@@ -16,7 +15,8 @@ describe('API Tests', () => {
 
     test('POST /api/ - success', async () => {
         const response = await request(app).post('/api/').send({ order: 'testOrder' });
-        expect(response.status).toBe(201);
+        console.log(response.status);
+        expect(response.status).toEqual(201);
     });
 
     test('POST /api/ - missing order', async () => {
@@ -33,6 +33,4 @@ describe('API Tests', () => {
         const response = await request(app).get('/api/nonexistent');
         expect(response.status).toBe(404);
     });
-
-
 });
