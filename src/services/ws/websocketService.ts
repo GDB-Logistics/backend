@@ -15,7 +15,7 @@ export const handleConnection = (io: Client) => {
     // Handle login from client
     io.on('login', (data: { userId: string; connectionType: 'admin' | 'mobile' }) => {
         const { userId, connectionType } = data;
-
+        console.log('login', userId, connectionType);
         if (!userId || !connectionType) {
             io.emit('login-response', { status: 400, error: 'Invalid request' });
             return;
@@ -68,6 +68,7 @@ export const broadcastFinishedWork = (work: string): void => {
 
 //? bug a mobile kuldesben nem talalja a testekben
 export const broadcastNewWork = (userId: string, work: string) => {
+    console.log(`Broadcasting new work: ${work} to admin and user: ${userId}`);
     adminClients.forEach((client) => {
         client.emit('newWork-admin', { userId: userId, work: work });
     });
