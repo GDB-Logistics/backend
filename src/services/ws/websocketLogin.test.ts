@@ -31,7 +31,7 @@ describe('WebSocket Server', () => {
 
     test('should handle login event admin', (done) => {
         clientSocket.emit('login', { userId: 'user1', connectionType: 'admin' });
-        clientSocket.on('message', (data: { status: number }) => {
+        clientSocket.on('login-response', (data: { status: number }) => {
             expect(data).toEqual({ status: 200 });
             done();
         });
@@ -39,7 +39,7 @@ describe('WebSocket Server', () => {
 
     test('should handle login event mobile', (done) => {
         clientSocket.emit('login', { userId: 'tamas', connectionType: 'mobile' });
-        clientSocket.on('message', (data: { status: number }) => {
+        clientSocket.on('login-response', (data: { status: number }) => {
             expect(data).toEqual({ status: 200 });
             done();
         });
@@ -49,7 +49,7 @@ describe('WebSocket Server', () => {
         const datas = [{ userId: 'user1' }, { connectionType: 'admin' }, {}];
         datas.forEach((loginData) => {
             clientSocket.emit('login', loginData);
-            clientSocket.on('message', (data: any) => {
+            clientSocket.on('login-response', (data: any) => {
                     expect(data).toEqual({ status: 400, error: 'Invalid request' });
                 });
             });
@@ -58,7 +58,7 @@ describe('WebSocket Server', () => {
 
     test('should handle login event error(Invalid connection type)', (done) => {
         clientSocket.emit('login', { userId: 'user1', connectionType: 'invalid' });
-        clientSocket.on('message', (data: any) => {
+        clientSocket.on('login-response', (data: any) => {
             expect(data).toEqual({ status: 400, error: 'Invalid connection type' });
             done();
         });

@@ -5,15 +5,9 @@ import apiRoute from './routes/api';
 import { setupWebSocketServer } from './wsServer';
 
 const app: Application = express();
-// const PORT = process.env.PORT || 3000;
-
-const server = http.createServer(app);
-
-setupWebSocketServer(server);
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
 app.use('/api', apiRoute);
 
 const createServer = (port: number) => {
@@ -27,6 +21,6 @@ const createServer = (port: number) => {
     return server;
 };
 
-// createServer(Number(PORT));
+createServer(Number(process.env.PORT) || 3000);
 
 export { app, createServer };

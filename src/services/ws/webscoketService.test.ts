@@ -1,61 +1,92 @@
 import { Server } from 'socket.io';
 import Client from 'socket.io-client';
+import request from 'supertest';
+import { createServer } from '../../server';
 import { handleConnection } from '../ws/websocketService';
 
-import request from 'supertest';
-import {app} from '../../server';
-
-describe('WebSocket Tests', () => {
-    const io: Server = new Server();
+describe('WebSocket Tests for single client', () => {
+    let io: Server;
     let clientSocket: any;
-    const PORT = 3090;
+    const PORT = 9000;
+    let server: any;
 
     beforeAll((done) => {
-        io.listen(PORT);
-        console.log('WebSocket server is running');
+        console.log('beforeAll');
+        server = createServer(PORT);
+        io = new Server(server);
         io.on('connection', handleConnection);
+        console.log('end beforeAll');
         done();
     });
 
-    afterAll(() => {
+    afterAll((done) => {
+        console.log('afterAll');
         io.close();
+        server.close(done);
+        console.log('end afterAll');
     });
 
     beforeEach((done) => {
+        console.log('beforeEach');
         clientSocket = Client(`ws://localhost:${PORT}`);
         clientSocket.on('connect', done);
+        console.log('end beforeEach');
     });
 
-    afterEach(() => {
-        clientSocket.close();
+    afterEach((done) => {
+        console.log('afterEach');
+        if (clientSocket.connected) {
+            clientSocket.disconnect();
+        }
+        console.log('end afterEach');
+        done();
     });
-
-    //** Tests
 
     test('should handle getting newWork to admin', (done) => {
         clientSocket.emit('login', { userId: 'user1', connectionType: 'admin' });
-        clientSocket.on('newWork', (data: { userId: string; work: string }) => {
-            try {
-                expect(data).toEqual({ userId: 'abraham', work: 'testOrder' });
-                done();
-            } catch (error) {
-                done(error);
-            }
+        clientSocket.on('login-response', (data: { status: number }) => {
+            console.log('Received login-response from WebSocket:', data);
+            request(server)
+                .post('/api/')
+                .send({ order: 'testOrder' })
+                .expect(201)
+                .end((err) => {
+                    if (err) {
+                        console.error('Error creating order:', err);
+                        return done(err);
+                    } else {
+                        console.log('Order created successfully');
+                    }
+                });
         });
-        request(app)
-            .post('/api/')
-            .send({ order: 'testOrder' })
-            .expect(201)
-            .end((err) => {
-                if (err) return done(err);
-            });
-    });
-
-    test('should handle completed event', (done) => {
-        clientSocket.emit('completed', { userId: 'user1', work: 'task1' });
-        clientSocket.on('message', (data: { status: number }) => {
-            expect(data).toEqual({ status: 200 });
+        clientSocket.on('newWork.admin', (data: { userId: string; work: string }) => {
+            console.log(`newWork event received with userId: ${data.userId} and work: ${data.work}`);
+            expect(data).toEqual({ userId: 'abraham', work: 'testOrder' });
             done();
         });
-    });
+    }, 10000);
+
+    test('should handle getting newWork to mobile', (done) => {
+        clientSocket.emit('login', { userId: 'abraham', connectionType: 'mobile' });
+        clientSocket.on('login-response', (data: { status: number }) => {
+            console.log('Received login-response from WebSocket:', data);
+            request(server)
+                .post('/api/')
+                .send({ order: 'testOrder' })
+                .expect(201)
+                .end((err) => {
+                    if (err) {
+                        console.error('Error creating order:', err);
+                        return done(err);
+                    } else {
+                        console.log('Order created successfully');
+                    }
+                });
+        });
+        clientSocket.on('newWork-mobile', (data: { work: string }) => {
+            console.log(`newWork event received the work: ${data.work}`);
+            expect(data).toEqual({ work: 'testOrder' });
+            done();
+        });
+    }, 10000);
 });
