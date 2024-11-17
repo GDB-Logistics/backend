@@ -12,7 +12,6 @@ interface Client extends Socket {
 }
 
 export const handleConnection = (io: Client) => {
-    console.log('New client connected');
     // Handle login from client
     io.on('login', (data: { userId: string; connectionType: 'admin' | 'mobile' }) => {
         const { userId, connectionType } = data;
@@ -31,7 +30,9 @@ export const handleConnection = (io: Client) => {
             return;
         }
 
-        io.emit('login-response',{ status: 200 });
+        io.userId = userId;
+        io.connectionType = connectionType;
+        io.emit('login-response', { status: 200 });
     });
 
     // Handle work completion
@@ -40,15 +41,15 @@ export const handleConnection = (io: Client) => {
             const { userId, work } = data;
 
             if (!userId || !work) {
-                io.emit('completed-response',{ status: 400, error: 'Invalid request' });
+                io.emit('completed-response', { status: 400, error: 'Invalid request' });
                 return;
             }
 
             removeCompletedWork(userId, work);
             broadcastFinishedWork(work);
-            io.emit('completed-response',{ status: 200 });
+            io.emit('completed-response', { status: 200 });
         } catch (e) {
-            io.emit('completed-response',{ status: 500, error: 'Internal Server Error' });
+            io.emit('completed-response', { status: 500, error: 'Internal Server Error' });
         }
     });
 
@@ -67,9 +68,6 @@ export const broadcastFinishedWork = (work: string): void => {
 
 //? bug a mobile kuldesben nem talalja a testekben
 export const broadcastNewWork = (userId: string, work: string) => {
-    console.log('Broadcasting new work to:', userId);
-    console.log(mobileClients.get(userId) ? 'Mobile client found' : 'Mobile client not found');
-
     adminClients.forEach((client) => {
         client.emit('newWork-admin', { userId: userId, work: work });
     });
