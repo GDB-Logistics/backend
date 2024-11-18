@@ -5,6 +5,9 @@ import { createServer } from '../../server';
 import { handleConnection } from '../ws/websocketService';
 import { resetData } from '../../model/data';
 
+import { pushNewWork } from '../../model/data';
+import {broadcastNewWork} from '../../services/ws/websocketService';
+
 describe('WebSocket Tests for single client', () => {
     let io: Server;
     let clientSocket: any;
@@ -176,7 +179,7 @@ describe('WebSocket Tests for multiple clients', () => {
             { userId: 'endre', work: 'testOrder2' },
             { userId: 'tamas', work: 'testOrder3' },
         ];
-        // Removed duplicate event listener for 'newWork-admin'
+
         clientSocketAbraham.on('newWork-mobile', (data: { work: string }) => {
             console.log('abraham', data);
             expect(data).toEqual({ work: 'testOrder1' });
@@ -198,9 +201,58 @@ describe('WebSocket Tests for multiple clients', () => {
                 done();
             }
         });
+
+        // Kikeruli az apit mivel a timing nem megfelelo a testekhez
         sentData.forEach((data) => {
             console.log('sending', data);
-            request(server).post('/api/').send({ order: data }).expect(201);
+            // request(server).post('/api/').send({ order: data }).expect(201);
+            broadcastNewWork(pushNewWork(data), data);
         });
-    }, 20000);
+    });
+
+    test('should handle getting newWork to admin and the 3 cliens and sending compleated events', (done) => {
+        const sentData = ['testOrder1', 'testOrder2', 'testOrder3'];
+        const datas: Array<{ userId: string; work: string }> = [];
+        const expectedData = [
+            { userId: 'abraham', work: 'testOrder1' },
+            { userId: 'endre', work: 'testOrder2' },
+            { userId: 'tamas', work: 'testOrder3' },
+            { userId: 'tamas', work: 'testOrder4' },
+        ];
+
+        clientSocketAbraham.on('newWork-mobile', (data: { work: string }) => {
+            console.log('abraham', data);
+            expect(data).toEqual({ work: 'testOrder1' });
+        });
+        clientSocketEndre.on('newWork-mobile', (data: { work: string }) => {
+            console.log('endre', data);
+            expect(data).toEqual({ work: 'testOrder2' });
+        });
+        clientSocketTamas.on('newWork-mobile', (data: { work: string }) => {
+            console.log('tamas', data);
+            expect(data).toEqual({ work: 'testOrder3' });
+            clientSocketTamas.emit('completed', { userId: 'tamas', work: 'testOrder3' });
+        });
+
+        clientSocketAdmin.on('newWork-admin', (data: { userId: string; work: string }) => {
+            console.log('admin', data);
+            datas.push(data);
+            if (datas.length === 4) {
+                expect(datas).toEqual(expectedData);
+                done();
+            }
+        });
+
+        clientSocketAdmin.on('workCompleted', (data: {userId:string, work: string }) => {
+            expect(data).toEqual({ userId: 'tamas', work: 'testOrder3' });
+            broadcastNewWork(pushNewWork("testOrder4"), "testOrder4");
+        });
+
+        // Kikeruli az apit mivel a timing nem megfelelo a testekhez
+        sentData.forEach((data) => {
+            console.log('sending', data);
+            // request(server).post('/api/').send({ order: data }).expect(201);
+            broadcastNewWork(pushNewWork(data), data);
+        });
+    });
 });
