@@ -46,7 +46,7 @@ export const handleConnection = (io: Client) => {
             }
 
             removeCompletedWork(userId, work);
-            broadcastFinishedWork(work);
+            broadcastFinishedWork(userId, work);
             io.emit('completed-response', { status: 200 });
         } catch (e) {
             io.emit('completed-response', { status: 500, error: 'Internal Server Error' });
@@ -60,9 +60,9 @@ export const handleConnection = (io: Client) => {
     });
 };
 
-export const broadcastFinishedWork = (work: string): void => {
+export const broadcastFinishedWork = (userId: string, work: string): void => {
     adminClients.forEach((client) => {
-        client.emit('workCompleted', { work: work });
+        client.emit('workCompleted', {userId:userId, work: work });
     });
 };
 
