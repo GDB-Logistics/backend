@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { handleConnection } from './services/ws/websocketService';
 
 const io = new Server();
-const PORT: number = Number(process.env.PORT) || 3030;
+// Remove the PORT constant as it is no longer needed
 
 interface Client extends Socket {
     userId?: string;
@@ -11,8 +11,10 @@ interface Client extends Socket {
 
 //Websocket setup
 export const setupWebSocketServer = (server: any) => {
-  io.listen(PORT);
-    console.log('WebSocket server is running');
+    io.attach(server);
+    console.log('WebSocket server is running on the same port as the HTTP server');
 
     io.on('connection', handleConnection);
 };
+
+export default setupWebSocketServer;

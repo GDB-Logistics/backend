@@ -7,15 +7,14 @@ works.set('tamas', new Array<string>());
 const names = ['abraham', 'endre', 'tamas'];
 
 export const pushNewWork = (work: string): string => {
-    const pendingWork1 = works.get('abraham')?.length;
-    const pendingWork2 = works.get('endre')?.length;
-    const pendingWork3 = works.get('tamas')?.length;
+    const pendingWork1 = works.get('abraham')?.length ?? 0;
+    const pendingWork2 = works.get('endre')?.length ?? 0;
+    const pendingWork3 = works.get('tamas')?.length ?? 0;
 
     const workLoads = [pendingWork1, pendingWork2, pendingWork3];
 
-    const smalestWorkLoad = [pendingWork1, pendingWork2, pendingWork3].sort()[0];
-
-    const selectedName = names[workLoads.indexOf(smalestWorkLoad)];
+    const smallestWorkLoad = Math.min(pendingWork1, pendingWork2, pendingWork3);
+    const selectedName = names[workLoads.indexOf(smallestWorkLoad)];
 
     const selectedWorkArray = works.get(selectedName);
     selectedWorkArray?.push(work);
@@ -32,3 +31,14 @@ export const removeCompletedWork = (userId: string, work: string): void => {
         );
     }
 };
+
+// added only for testing purposes
+export const getWorks = (worker :string) : Array<string> => {
+    return works.get(worker) ?? [];
+}
+
+export const resetData = () => {
+    works.set('abraham', new Array<string>());
+    works.set('endre', new Array<string>());
+    works.set('tamas', new Array<string>());
+}
